@@ -1,0 +1,59 @@
+operations:
+  view:
+    - type: web
+      impl: index.html
+actions: actions
+web: web-src
+runtimeManifest:
+  packages:
+    dx-excshell-1:
+      license: Apache-2.0
+      actions:
+        payloads-list:
+          function: actions/payloads-list/index.js
+          web: 'yes'
+          runtime: 'nodejs:14'
+          inputs:
+            LOG_LEVEL: debug
+          annotations:
+            require-adobe-auth: true
+            final: true
+        webhook-out:
+          function: actions/webhook-out/index.js
+          web: 'yes'
+          runtime: 'nodejs:14'
+          inputs:
+            LOG_LEVEL: debug
+          annotations:
+            require-adobe-auth: true
+            final: true
+        get-auth:
+          function: actions/get-auth/index.js
+          web: 'yes'
+          runtime: 'nodejs:14'
+          inputs:
+            LOG_LEVEL: debug
+            IMS: $IMS
+          annotations:
+            require-adobe-auth: false
+            final: true
+        webhook1:
+          function: actions/webhook/index.js
+          web: 'yes'
+          runtime: 'nodejs:14'
+          inputs:
+            LOG_LEVEL: debug
+            LEARNER_ID: leaner1
+          annotations:
+            require-adobe-auth: false
+            final: true
+        webhook2:
+          function: actions/webhook/index.js
+          web: 'yes'
+          runtime: 'nodejs:14'
+          inputs:
+            LOG_LEVEL: debug
+            LEARNER_ID: leaner2
+          annotations:
+            require-adobe-auth: false
+            final: true
