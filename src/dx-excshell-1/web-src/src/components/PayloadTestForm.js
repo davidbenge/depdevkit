@@ -20,7 +20,7 @@ import {
   View
 } from '@adobe/react-spectrum'
 import Function from '@spectrum-icons/workflow/Function'
-
+import LearnerSelect from './LearnerSelect';
 import actions from '../config.json'
 import actionWebInvoke from '../utils'
 
@@ -32,16 +32,28 @@ const PayloadTestForm = (props) => {
     actionPayloadValid: null,
     actionInvokeInProgress: false,
     actionResult: ''
-  })
+  });
+  const [selectedLearnerObject, setLearnerObject] = useState();
 
-  console.log('actions', actions)
+  const handleLearnerInputChange = (learner) => {
+    if(typeof learner !== 'undefined') {
+      console.log(`in payload list setting learner object`);
+      console.log(learner);
+      setLearnerObject(learner);
+    }else{
+      console.error(`in handleLearnerInputChange and learner object is undefined`);
+    }
+  };
 
   return (
     <View width="size-6000">
       <Heading level={1}>Post data into webhook</Heading>
+      <Flex width="100%" alignItems="left">
+        <LearnerSelect onSelectChange={handleLearnerInputChange} {...props}></LearnerSelect>
+      </Flex>
       <Form necessityIndicator="label">
-
         <TextArea
+          width="size-6000"
           label="json payload"
           placeholder='{ "mykey": "my super cool value", "anotherKey":"another super critical value" }'
           validationState={state.payloadValid}
@@ -113,14 +125,13 @@ const PayloadTestForm = (props) => {
   async function invokeAction () {
     setState({ ...state, actionInvokeInProgress: true, payloadResult: 'calling action ... ' })
     const headers = {}
-    const params = {}
+    const params = state.actionPayload
     console.log("state on submit",state)
-    params.payload = state.actionPayload
     const startTime = Date.now()
     let formattedResult = ""
     try {
       // invoke backend action
-      const actionResponse = await actionWebInvoke(actions["webhook-in"], headers, params)
+      const actionResponse = await actionWebInvoke(actions[selectedLearnerObject.webhookId], headers, params)
       formattedResult = `time: ${Date.now() - startTime} ms\n` + JSON.stringify(actionResponse,0,2)
       // store the response
       setState({
@@ -130,7 +141,7 @@ const PayloadTestForm = (props) => {
         actionResponseError: null,
         actionInvokeInProgress: false
       })
-      console.log(`Response from webhook-in:`, actionResponse)
+      console.log(`Response from webhook:`, actionResponse)
     } catch (e) {
       // log and store any error message
       formattedResult = `time: ${Date.now() - startTime} ms\n` + e.message

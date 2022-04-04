@@ -37,12 +37,39 @@ async function main (params) {
     //clean params 
     params['webhook_receive_id'] = nowKey
 
-    // object in the file
-    const fileContent = {
-      params
-    }
+    // clean up the params to store.  We want to remove all the OpenWhisk related ones
+    let cleanParams = Object.assign({},params)
+    delete cleanParams['LEARNER_ID']
+    delete cleanParams['LOG_LEVEL']
+    delete cleanParams.__ow_headers.via
+    delete cleanParams.__ow_headers['x-azure-clientip']
+    delete cleanParams.__ow_headers['x-azure-fdid']
+    delete cleanParams.__ow_headers['x-azure-ref']
+    delete cleanParams.__ow_headers['x-azure-requestchain']
+    delete cleanParams.__ow_headers['x-azure-socketip']
+    delete cleanParams.__ow_headers['x-envoy-external-address']
+    delete cleanParams.__ow_headers['x-forwarded-for']
+    delete cleanParams.__ow_headers['x-forwarded-host']
+    delete cleanParams.__ow_headers['x-forwarded-port']
+    delete cleanParams.__ow_headers['x-forwarded-proto']
+    delete cleanParams.__ow_headers['x-real-ip']
+    delete cleanParams.__ow_headers['x-request-id']
+    delete cleanParams.__ow_headers['sec-ch-ua']
+    delete cleanParams.__ow_headers['sec-ch-ua-mobile']
+    delete cleanParams.__ow_headers['sec-ch-ua-platform']
+    delete cleanParams.__ow_headers['sec-fetch-dest']
+    delete cleanParams.__ow_headers['sec-fetch-mode']
+    delete cleanParams.__ow_headers['sec-fetch-site']
+    delete cleanParams.__ow_headers['referer']
+    delete cleanParams.__ow_headers['perf-br-req-in']
+    delete cleanParams.__ow_headers['host']
+    delete cleanParams.__ow_method
+    delete cleanParams.__ow_path
 
-    await fileLib.write(`${params.LEARNER_ID}/${nowKey}.json`,JSON.stringify(fileContent));
+    logger.debug("FILE CONTENT")
+    logger.debug(stringParameters(cleanParams))
+    
+    await fileLib.write(`${params.LEARNER_ID}/${nowKey}.json`,JSON.stringify(cleanParams))
 
     const response = {
       statusCode: 200,

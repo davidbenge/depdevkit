@@ -32,7 +32,10 @@
      const existingFiles = await fileLib.list(`/${params.leaner_id}/`)
     
     if(!existingFiles.length){
-      return errorResponse(404,'No payloads found',logger)
+      return{
+        statusCode:200,
+        body:[]
+      }
     }else{
       const body = []
 

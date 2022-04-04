@@ -27,7 +27,7 @@ const selection = new Set();
 
 export const PayloadList = ({ actionCallHeaders, props }) => {
   const [isLoading, setIsLoading] = useState(true);
-  const [payloads, setPayloads] = useState(true);
+  const [payloads, setPayloads] = useState([]);
   const [selectedPayloads, setSelectedPayloads] = useState(selection);
   const [isDialogOpen, setDialogIsOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -41,25 +41,46 @@ export const PayloadList = ({ actionCallHeaders, props }) => {
 
   useEffect(() => {
     (async () => {
-      const res = await actionWebInvoke(`${actions['payloads-list']}?leaner_id=leaner1`,actionCallHeaders);
-
-      if (res.error) {
-        alert(res.error.message);
-      } else {
-        setPayloads(res.reverse());
-      }
-
-      console.log(res);
-      console.log("payloads after load",payloads);
-
-      setIsLoading(false);
     })();
   }, []);
 
+  const loadPayloads = async (learnerKey) => {
+    console.log(`in loadPayloads`);
+    
+    setIsLoading(true);
+    let res;
+    try{
+      res = await actionWebInvoke(`${actions['payloads-list']}?leaner_id=${learnerKey}`,actionCallHeaders);
+    }catch(e){
+      console.error(e);
+    } 
+    console.log(res);
+
+    if(res.status === 404){
+      alert("No payloads found for this learner");
+      setPayloads([]);
+    }else if(res.error) {
+      alert(res.error.message);
+      setPayloads([]);
+    } else {
+      setPayloads(res.reverse());
+    }
+
+    console.log(res);
+    console.log("loadPayloads after change load",payloads);
+
+    setIsLoading(false);
+  };
+
   const handleLearnerInputChange = (learner) => {
-    console.log(`in payload list setting learner object`);
-    console.log(learner);
-    setLearnerObject(learner);
+    if(typeof learner !== 'undefined') {
+      console.log(`in payload list setting learner object`);
+      console.log(learner);
+      setLearnerObject(learner);
+      loadPayloads(learner.key);
+    }else{
+      console.error(`in handleLearnerInputChange and learner object is undefined`);
+    }
   };
 
   return (
@@ -106,7 +127,6 @@ export const PayloadList = ({ actionCallHeaders, props }) => {
                         selection.clear();
                         payloads.forEach((payload) => selection.add(payloads.id));
                       }
-
                       setSelectedPayloads(new Set(selection));
                     }}
                   />
@@ -149,7 +169,7 @@ export const PayloadList = ({ actionCallHeaders, props }) => {
                   </td>
 
                   <td className="spectrum-Table-cell">
-                    <pre>{JSON.stringify(pl.params, null, 3)}</pre>
+                    <pre>{JSON.stringify(pl, null, 3)}</pre>
                   </td>
                 </tr>
               ))}
