@@ -12,6 +12,9 @@ function SideBar () {
         <NavLink className="SideNav-itemLink" activeClassName="is-selected" aria-current="page" exact to="/">Home</NavLink>
       </li>
       <li className="SideNav-item">
+        <NavLink className="SideNav-itemLink" activeClassName="is-selected" aria-current="page" to="/auth">Authentication</NavLink>
+      </li>
+      <li className="SideNav-item">
         <NavLink className="SideNav-itemLink" activeClassName="is-selected" aria-current="page" to="/payload-test">Submit payload to webhook</NavLink>
       </li>
       <li className="SideNav-item">

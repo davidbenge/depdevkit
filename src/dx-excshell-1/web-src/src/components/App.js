@@ -9,6 +9,7 @@ import { HashRouter as Router, Switch, Route } from 'react-router-dom'
 import SideBar from './SideBar'
 import ActionsForm from './ActionsForm'
 import { Home } from './Home'
+import { Auth } from './Auth'
 import { About } from './About'
 import PayloadTestForm from './PayloadTestForm'
 import { PayloadList } from './PayloadList'
@@ -49,6 +50,9 @@ function App (props) {
               <Switch>
                 <Route exact path='/'>
                   <Home></Home>
+                </Route>
+                <Route path='/auth'>
+                  <Auth runtime={props.runtime} ims={props.ims} actionCallHeaders={props.actionCallHeaders}/>
                 </Route>
                 <Route path='/payload-test'>
                   <PayloadTestForm runtime={props.runtime} ims={props.ims} actionCallHeaders={props.actionCallHeaders}/>
