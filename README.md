@@ -1,6 +1,6 @@
-# EA Developer Enablement Program
+# Developer Enablement Program
 
-Welcome to EA Developer Enablement Program helper 
+Welcome to Developer Enablement Program helper 
   
 ## Setup
 
