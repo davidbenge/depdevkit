@@ -15,7 +15,7 @@ async function main (params) {
     logger.info('Calling the webhookin action')
 
     // log parameters, only if params.LOG_LEVEL === 'debug'
-    logger.debug(stringParameters(params))
+    logger.debug(stringParameters(process.env))
 
     // check for missing request input parameters and headers
     const requiredParams = []
