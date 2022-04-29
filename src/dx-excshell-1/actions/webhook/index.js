@@ -10,6 +10,26 @@ async function main (params) {
   // create a Logger
   const logger = Core.Logger('main', { level: params.LOG_LEVEL || 'info' })
 
+  // Handle challenge request
+  if (params.challenge) {
+    let response = {
+      statusCode: 200,
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: {
+        challenge: params.challenge
+      }
+    };
+    /*
+    response.body = new Buffer(JSON.stringify({
+          "challenge": params.challenge
+    })).toString('base64');
+    */
+
+    return response;
+  }
+
   try {
     // 'info' is the default level if not set
     logger.info('Calling the webhookin action')
@@ -66,6 +86,8 @@ async function main (params) {
     delete cleanParams.__ow_method
     delete cleanParams.__ow_path
 
+    const size = Buffer.byteLength(JSON.stringify(cleanParams), 'utf8')
+    cleanParams['payload-size-bytes'] = size
     logger.debug("FILE CONTENT")
     logger.debug(stringParameters(cleanParams))
     
@@ -74,8 +96,9 @@ async function main (params) {
     const response = {
       statusCode: 200,
       body: {
-        message: 'Successfully stored the payload in the file store',
-        payloadKey: nowKey
+        'message': 'Successfully stored the payload in the file store',
+        'payloadKey': nowKey,
+        'payload-size-bytes': size
       }
     }
 

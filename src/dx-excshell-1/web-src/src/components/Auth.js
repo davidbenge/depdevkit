@@ -71,11 +71,17 @@ export const Auth = () => {
     <Heading level={1}>Authentication Help</Heading>
     <Flex direction="column">
       <Well marginBottom="size-150">
-        <Text marginBottom="size-150">Authentication serivce url: {actions['get-auth']}&nbsp;&nbsp;
-          <CopyToClipboard text={actions['get-auth']}>
-            <ActionButton>Copy</ActionButton>
-          </CopyToClipboard>
-        </Text>
+        <Heading level={2}>Authentication URL</Heading>
+        <Flex direction="row" height="size-400" gap="size-100">
+          <View backgroundColor="gray-50" width="size-8000" paddingX={10} paddingY={10} paddingBott={10} alignSelf="center">
+            <Text className="url-box">{actions['get-auth']}&nbsp;&nbsp;</Text>
+          </View>
+          <View width="size-1000">
+            <CopyToClipboard text={actions['get-auth']}>
+              <ActionButton>Copy</ActionButton>
+            </CopyToClipboard>
+          </View>
+        </Flex>
         <br></br>
         The service will return a json object with the following keys:
         <AceEditor
