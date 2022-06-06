@@ -22,17 +22,19 @@ import { useHistory } from 'react-router-dom';
 import actionWebInvoke from '../utils';
 import actions from '../config';
 import LearnerSelect from './LearnerSelect';
+import Cookies from 'js-cookie';
 
 const selection = new Set();
 
 export const PayloadList = ({ actionCallHeaders, props }) => {
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [payloads, setPayloads] = useState([]);
   const [selectedPayloads, setSelectedPayloads] = useState(selection);
   const [isDialogOpen, setDialogIsOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [selectedLearnerObject, setLearnerObject] = useState();
+  const [learnerId, setLearnerId] = useState();
   const history = useHistory();
+  const [hasFocus, setFocus] = useState(true);
 
   const JsonConfig = {
     type: "front end",
@@ -42,49 +44,95 @@ export const PayloadList = ({ actionCallHeaders, props }) => {
   useEffect(() => {
     (async () => {
     })();
+
+    document.addEventListener("visibilitychange", function() {
+      //console.log( 'document.hidden', document.hidden );  
+      activeViewChanged(document.hidden);
+    });
+    
+    window.addEventListener('focus', function() {
+     //console.log("window is active!" );
+     activeViewChanged(true);
+    });
+    
+    window.addEventListener('blur', function() {
+      //console.warn("window is not active!" );
+      activeViewChanged(false);
+    });
+    
+    loadPayloads();
+
+    const interval=setInterval(()=>{
+      loadPayloads();
+     },30000)
+       
+     return()=>clearInterval(interval);
+
   }, []);
 
-  const loadPayloads = async (learnerKey) => {
-    console.log(`in loadPayloads`);
-    
+  const activeViewChanged = (newValue) => {
+    //console.info("setting focus to",newValue);
+    setFocus(newValue);
+  };
+
+  const loadPayloads = async () => {
+    console.log(`in loadPayloads and has focus is ${hasFocus} and learner id is ${learnerId}`);
+    if((!hasFocus) || (typeof learnerId === 'undefined')) {
+      if(typeof learnerId === 'undefined'){
+        //double check for page restarts
+        checkForCookieSet();
+      }
+      return;
+    }
+    console.log(`in loadPayloads and moving forward`);
     setIsLoading(true);
+
     let res;
     try{
-      res = await actionWebInvoke(`${actions['payloads-list']}?leaner_id=${learnerKey}`,actionCallHeaders);
+      res = await actionWebInvoke(`${actions['payloads-list']}/${learnerId}`,actionCallHeaders);
     }catch(e){
       console.error(e);
     } 
     console.log(res);
 
     if(res.status === 404){
-      alert("No payloads found for this learner");
+      alert(`No payloads found for this learner ${learnerId}`);
       setPayloads([]);
     }else if(res.error) {
       alert(res.error.message);
       setPayloads([]);
     } else {
-      setPayloads(res.reverse());
+      //if the payload has updated set the object
+      if(res.length !== payloads.length){
+        setPayloads(res.reverse());
+        console.log("loadPayloads after change load",payloads);
+      }
     }
-
-    console.log(res);
-    console.log("loadPayloads after change load",payloads);
 
     setIsLoading(false);
   };
 
-  const handleLearnerInputChange = (learner) => {
-    if(typeof learner !== 'undefined') {
-      console.log(`in payload list setting learner object`);
-      console.log(learner);
-      setLearnerObject(learner);
-      loadPayloads(learner.key);
+  const checkForCookieSet = () => {
+    let cookieSelectLearner = Cookies.get('selectedLearner');
+    console.log('cookie check');
+    if(typeof cookieSelectLearner !== 'undefined'){
+      console.log('cookie check found',cookieSelectLearner);
+      learnerId = cookieSelectLearner;
+    }
+  }
+
+  const handleLearnerInputChange = (plearnerId) => {
+    console.log(`in payload list handleLearnerInputChange ${plearnerId}`);
+    if(typeof plearnerId !== 'undefined') {
+      console.log(`in payload list setting learner id ${plearnerId}`);
+      learnerId = plearnerId;
     }else{
       console.error(`in handleLearnerInputChange and learner object is undefined`);
     }
   };
 
   return (
-    <View elementType="main" minHeight="100vh" marginX="size-400">
+    <View elementType="main" minHeight="100vh" marginX="size-400" onFocus={() => setFocus(true)} onBlur={() => setFocus(false)}>
       <Flex alignItems="center" justifyContent="center" direction="column" marginY="size-400" gap="size-400">
         <h2 className="spectrum-Heading spectrum-Heading--sizeL spectrum-Heading--serif">Browse all webhook payloads</h2>
         
@@ -145,15 +193,15 @@ export const PayloadList = ({ actionCallHeaders, props }) => {
                   <td className="spectrum-Table-cell">
                     <Checkbox
                       aria-label="Select payload"
-                      isSelected={selectedPayloads.has(pl.webhook_receive_id)}
+                      isSelected={selectedPayloads.has(pl['call-time'])}
                       onChange={() => {
                         // Toggle payload selection
-                        if (selection.has(pl.webhook_receive_id)) {
+                        if (selection.has(pl['call-time'])) {
                           console.log("payload is already selected deleting");
-                          selection.delete(pl.webhook_receive_id);
+                          selection.delete(pl['call-time']);
                         } else {
-                          console.log("payload is NOT already selected",pl.webhook_receive_id);
-                          selection.add(pl.webhook_receive_id);
+                          console.log("payload is NOT already selected",pl['call-time']);
+                          selection.add(pl['call-time']);
                         }
 
                         setSelectedPayloads(new Set(selection));
@@ -163,13 +211,13 @@ export const PayloadList = ({ actionCallHeaders, props }) => {
 
                   <td className="spectrum-Table-cell">
                       <span>
-                        {pl.webhook_receive_id}
+                        {pl['call-time']}
                         <br />
                       </span>
                   </td>
 
                   <td className="spectrum-Table-cell">
-                    <pre>{JSON.stringify(pl, null, 3)}</pre>
+                    <pre>{JSON.stringify(pl['payload'], null, 3)}</pre>
                   </td>
                 </tr>
               ))}

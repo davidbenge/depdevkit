@@ -31,15 +31,16 @@ const PayloadTestForm = (props) => {
     actionPayload: null,
     actionPayloadValid: null,
     actionInvokeInProgress: false,
-    actionResult: ''
+    actionResult: '',
+    learnerId: undefined
   });
-  const [selectedLearnerObject, setLearnerObject] = useState();
 
-  const handleLearnerInputChange = (learner) => {
-    if(typeof learner !== 'undefined') {
-      console.log(`in payload list setting learner object`);
-      console.log(learner);
-      setLearnerObject(learner);
+  const handleLearnerInputChange = (pLearnerId) => {
+    console.log(`in testing form handleLearnerInputChange ${pLearnerId}`);
+    if(typeof pLearnerId !== 'undefined') {
+      console.log(`in testing form setting learnerid ${pLearnerId}`);
+      console.log(pLearnerId);
+      learnerId = pLearnerId;
     }else{
       console.error(`in handleLearnerInputChange and learner object is undefined`);
     }
@@ -131,7 +132,7 @@ const PayloadTestForm = (props) => {
     let formattedResult = ""
     try {
       // invoke backend action
-      const actionResponse = await actionWebInvoke(actions[selectedLearnerObject.webhookId], headers, params)
+      const actionResponse = await actionWebInvoke(`${actions['webhook']}/${learnerId}`, headers, params)
       formattedResult = `time: ${Date.now() - startTime} ms\n` + JSON.stringify(actionResponse,0,2)
       // store the response
       setState({

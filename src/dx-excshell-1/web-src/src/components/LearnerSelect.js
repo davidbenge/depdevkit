@@ -8,79 +8,44 @@ import {
   ComboBox, 
   Item, 
   Section,
-  Flex
+  Flex,
+  TextField
 } from '@adobe/react-spectrum';
 import Cookies from 'js-cookie';
 import actions from '../config';
 
 function LearnerSelect ({onSelectChange,...props}) {
-  const learners = [
-    {
-      "id": 1,
-      "name": "Learner 1",
-      "webhookId": "webhook1",
-      "key": "learner1"
-    },
-    {
-      "id": 2,
-      "name": "Learner 2",
-      "webhookId": "webhook2",
-      "key": "learner2"
-    }
-  ];
-  const [selectedLearnerId, setLearnerId] = useState(1);
-  const [selectedLearnerObject, setLearnerObject] = useState(learners[0]);
-  const defaultLeanerKey = "learner1";
-
-  const setSelectedLearnerCookie = (value) => {
-    Cookies.set('selectedLearner', value);
-  }
+  const [selectedLearnerId, setLearnerId] = useState('learner1');
 
   const getSelectedLearnerCookie = (value) => {
     return Cookies.get('selectedLearner');
   }
 
-  const getLearnerObjectByKey = (key) => {
-    let learner = learners.find(l => l.key === key);
-    return learner;
-  }
-
   const handleInputChange = (sle) => {
+    console.log("handleInputChange");
     console.log(sle);
-    let selectedLearnerObject = getLearnerObjectByKey(sle);
 
-    console.log(selectedLearnerObject);
-    setLearnerId(selectedLearnerObject.id);
-    setSelectedLearnerCookie(sle);
-    setLearnerObject(selectedLearnerObject);
-    onSelectChange(selectedLearnerObject);
-    console.log(`LS selected learner: ${sle}`);
+    Cookies.set('selectedLearner', sle);
+    onSelectChange(sle);
+    setLearnerId(sle);
   };
 
   useEffect(() => {
     let cookieSelectLearner = getSelectedLearnerCookie();
-    let startUpLearnerKey = defaultLeanerKey;
 
     console.log(`cookieSelectLearner: ${cookieSelectLearner}`);
     if(typeof cookieSelectLearner !== 'undefined') {
-      startUpLearnerKey = cookieSelectLearner;
+      onSelectChange(cookieSelectLearner);
+      setLearnerId(cookieSelectLearner);
     }
-    console.log(`startUpLearner: ${startUpLearnerKey}`);
-    let selectedLearnerObject = getLearnerObjectByKey(startUpLearnerKey);
-
-    setSelectedLearnerCookie(selectedLearnerObject.key);
-    setLearnerId(selectedLearnerObject.id);
-    setLearnerObject(selectedLearnerObject);
-    onSelectChange(selectedLearnerObject);
+    console.log(`startUpLearner: ${cookieSelectLearner}`);
   }, []);
 
   return (
     <Flex direction="column">
-      <ComboBox label="Target Learner Environment" isRequired onSelectionChange={handleInputChange} defaultItems={learners} defaultSelectedKey={1} selectedKey={selectedLearnerId} inputValue={selectedLearnerObject.name}>
-        {item => <Item>{item.name}</Item>}
-      </ComboBox>
+      <TextField label="Target Learner ID" onChange={handleInputChange} value={selectedLearnerId} />
         Webhook endpoint:<br/>
-        <span>{actions[selectedLearnerObject.webhookId]}</span>
+        <span>{actions['webhook']}/{selectedLearnerId}</span>
     </Flex>
   )
 }

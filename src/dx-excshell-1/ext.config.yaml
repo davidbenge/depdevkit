@@ -11,12 +11,12 @@ runtimeManifest:
       actions:
         payloads-list:
           function: actions/payloads-list/index.js
-          web: 'yes'
+          web: raw
           runtime: 'nodejs:14'
           inputs:
             LOG_LEVEL: debug
           annotations:
-            require-adobe-auth: true
+            require-adobe-auth: false
             final: true
         webhook-out:
           function: actions/webhook-out/index.js
@@ -37,23 +37,24 @@ runtimeManifest:
           annotations:
             require-adobe-auth: false
             final: true
-        webhook1:
+        webhook:
           function: actions/webhook/index.js
-          web: 'yes'
+          web: raw
           runtime: 'nodejs:14'
           inputs:
             LOG_LEVEL: debug
-            LEARNER_ID: learner1
           annotations:
             require-adobe-auth: false
             final: true
-        webhook2:
-          function: actions/webhook/index.js
+        testhook:
+          function: actions/testhook/index.js
           web: 'yes'
           runtime: 'nodejs:14'
           inputs:
             LOG_LEVEL: debug
-            LEARNER_ID: learner2
+            SOCKET_CLUSTER_ID: demo
+            SOCKET_API_KEY: VCXCEuvhGcBDP7XhiJJUDvR1e1D3eiVjgZ9VRiaV
+            SOCKET_API_SECRET: Fvev5c0k59VZ1jRLWuj5URyF5idSdHWm
           annotations:
             require-adobe-auth: false
             final: true

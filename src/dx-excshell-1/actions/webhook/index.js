@@ -2,8 +2,11 @@
  * This will take in a JSON payload and store it to the file store
  */
 
-const { Core, Files } = require('@adobe/aio-sdk')
+const { Core } = require('@adobe/aio-sdk')
+const stateLib = require('@adobe/aio-lib-state')
 const { errorResponse, stringParameters, checkMissingRequestInputs } = require('../utils')
+const moment = require('moment')
+let LEARNER_ID = "learnerX"
 
 // main function that will be executed by Adobe I/O Runtime
 async function main (params) {
@@ -35,7 +38,7 @@ async function main (params) {
     logger.info('Calling the webhookin action')
 
     // log parameters, only if params.LOG_LEVEL === 'debug'
-    logger.debug(stringParameters(process.env))
+    logger.debug(stringParameters(params))
 
     // check for missing request input parameters and headers
     const requiredParams = []
@@ -46,64 +49,68 @@ async function main (params) {
       return errorResponse(400, errorMessage, logger)
     }
 
-    //store the request payload in the file store
-    const fileLib = await Files.init()
-    // delete all files including public
-    //await fileLib.delete('/')
+    //normalize the body
+    //logger.debug(`params.__ow_body is ${typeof params.__ow_body}`)
+    //logger.debug(`params.__ow_body value = ${params.__ow_body}`)
 
-    // Now we are going to store payload in the file store as a JSON file.  the file name will be the current timestamp and the folder ATM is default 
-    const nowKey = new Date().getTime()
-
-    //clean params 
-    params['webhook_receive_id'] = nowKey
-
-    // clean up the params to store.  We want to remove all the OpenWhisk related ones
-    let cleanParams = Object.assign({},params)
-    delete cleanParams['LEARNER_ID']
-    delete cleanParams['LOG_LEVEL']
-    delete cleanParams.__ow_headers.via
-    delete cleanParams.__ow_headers['x-azure-clientip']
-    delete cleanParams.__ow_headers['x-azure-fdid']
-    delete cleanParams.__ow_headers['x-azure-ref']
-    delete cleanParams.__ow_headers['x-azure-requestchain']
-    delete cleanParams.__ow_headers['x-azure-socketip']
-    delete cleanParams.__ow_headers['x-envoy-external-address']
-    delete cleanParams.__ow_headers['x-forwarded-for']
-    delete cleanParams.__ow_headers['x-forwarded-host']
-    delete cleanParams.__ow_headers['x-forwarded-port']
-    delete cleanParams.__ow_headers['x-forwarded-proto']
-    delete cleanParams.__ow_headers['x-real-ip']
-    delete cleanParams.__ow_headers['x-request-id']
-    delete cleanParams.__ow_headers['sec-ch-ua']
-    delete cleanParams.__ow_headers['sec-ch-ua-mobile']
-    delete cleanParams.__ow_headers['sec-ch-ua-platform']
-    delete cleanParams.__ow_headers['sec-fetch-dest']
-    delete cleanParams.__ow_headers['sec-fetch-mode']
-    delete cleanParams.__ow_headers['sec-fetch-site']
-    delete cleanParams.__ow_headers['referer']
-    delete cleanParams.__ow_headers['perf-br-req-in']
-    delete cleanParams.__ow_headers['host']
-    delete cleanParams.__ow_method
-    delete cleanParams.__ow_path
-
-    const size = Buffer.byteLength(JSON.stringify(cleanParams), 'utf8')
-    cleanParams['payload-size-bytes'] = size
-    logger.debug("FILE CONTENT")
-    logger.debug(stringParameters(cleanParams))
+    if(typeof params.__ow_body == "string"){
+      //logger.debug(`params.__ow_body is STRING and we are going to decode it`)
+      if(params.__ow_body.endsWith("=")){
+        //logger.debug(`params.__ow_body DECODING`)
+        let bodyBuffer = Buffer.from(params.__ow_body, 'base64')
+        params.__ow_body = bodyBuffer.toString('utf8')
+        //logger.debug(`params.__ow_body is now ${params.__ow_body}`)
+      }
+    }
     
-    await fileLib.write(`${params.LEARNER_ID}/${nowKey}.json`,JSON.stringify(cleanParams))
+    /****
+     * get the paths and use the first one as our key
+     */
+    if(params.__ow_path && params.__ow_path.length) {
+      let parts = params.__ow_path.split('/')
+      if(parts.length === 2) {
+        LEARNER_ID = decodeURIComponent(parts[1])
+      }else{
+        const errorMessage = "learner url param (webhook/{learnerX}) is not defined in the request"
+        return errorResponse(400, errorMessage, logger)
+      }
+    }else{
+      const errorMessage = "learner url param (webhook/{learnerX}) is not defined in the request"
+      return errorResponse(400, errorMessage, logger)
+    }
+
+    //store the request payload in the state
+    const state = await stateLib.init()
+
+    //get current learner if they exist 
+    //logger.debug(`Learner id is ${LEARNER_ID}`)
+    const res = await state.get(LEARNER_ID) // res = { value, expiration }
+    let learnerValue = res ? res.value : new Array()
+
+    let payloadBody = JSON.parse(params.__ow_body)
+    //logger.debug(`payloadBody checking size`)
+    const payloadBodySize = Buffer.byteLength(JSON.stringify(payloadBody), 'utf8')
+
+    let storageContainer = {
+      'call-time': moment().unix(),
+      'call-size': payloadBodySize,
+      'payload': payloadBody
+    }
+    learnerValue.push(storageContainer)
+
+    await state.put(LEARNER_ID, learnerValue)
 
     const response = {
       statusCode: 200,
       body: {
-        'message': 'Successfully stored the payload in the file store',
-        'payloadKey': nowKey,
-        'payload-size-bytes': size
+        'message': `Successfully handled webhook for ${LEARNER_ID}`,
+        'payload-size-bytes': payloadBodySize,
+        'learner-test-count': learnerValue.length
       }
     }
 
     // log the response status code
-    logger.info(`${response.statusCode}: successful request`)
+    //logger.info(`${response.statusCode}: successful request`)
     return response
   } catch (error) {
     // log any server errors
