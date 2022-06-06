@@ -17,6 +17,7 @@ import { PayloadList } from './PayloadList'
 function App (props) {
   console.log('runtime object:', props.runtime)
   console.log('ims object:', props.ims)
+  console.log('excShell', props.excShell)
 
   // use exc runtime event handlers
   // respond to configuration change events (e.g. user switches org)
@@ -32,7 +33,8 @@ function App (props) {
     <ErrorBoundary onError={onError} FallbackComponent={fallbackComponent}>
       <Router>
         <Provider theme={defaultTheme} colorScheme={`light`}>
-          <Grid
+          {props.excShell? (
+            <Grid
             areas={['sidebar content']}
             columns={['256px', '3fr']}
             rows={['auto']}
@@ -63,6 +65,24 @@ function App (props) {
               </Switch>
             </View>
           </Grid>
+          ) : (
+            <View padding='size-200'>
+              <Switch>
+                <Route exact path='/'>
+                  <Home></Home>
+                </Route>
+                <Route path='/auth'>
+                  <Auth runtime={props.runtime} ims={props.ims} actionCallHeaders={props.actionCallHeaders}/>
+                </Route>
+                <Route path='/payload-test'>
+                  <PayloadTestForm runtime={props.runtime} ims={props.ims} actionCallHeaders={props.actionCallHeaders}/>
+                </Route>
+                <Route path='/payload-list'>
+                  <PayloadList runtime={props.runtime} ims={props.ims} actionCallHeaders={props.actionCallHeaders}/>
+                </Route>
+              </Switch>
+            </View>
+          )}
         </Provider>
       </Router>
     </ErrorBoundary>

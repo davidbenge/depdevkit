@@ -12,12 +12,15 @@ import Runtime, { init } from '@adobe/exc-app'
 
 import App from './components/App'
 import './index.css'
+
+let runningInExcShell = false
 /* Here you can bootstrap your application and configure the integration with the Adobe Experience Cloud Shell */
 try {
   // attempt to load the Experience Cloud Runtime
   require('./exc-runtime')
   // if there are no errors, bootstrap the app in the Experience Cloud Shell
   init(bootstrapInExcShell)
+  runningInExcShell = true
 } catch (e) {
   console.log('application not running in Adobe Experience Cloud Shell')
   // fallback mode, run the application without the Experience Cloud Runtime
@@ -31,7 +34,7 @@ function bootstrapRaw () {
 
   // render the actual react application and pass along the runtime object to make it available to the App
   ReactDOM.render(
-    <App runtime={mockRuntime} ims={mockIms} />,
+    <App runtime={mockRuntime} ims={mockIms} excShell={runningInExcShell}/>,
     document.getElementById('root')
   )
 }
@@ -64,7 +67,7 @@ function bootstrapInExcShell () {
 
     // render the actual react application and pass along the runtime and ims objects to make it available to the App
     ReactDOM.render(
-      <App runtime={runtime} ims={ims} actionCallHeaders={actionCallHeaders}/>,
+      <App runtime={runtime} ims={ims} actionCallHeaders={actionCallHeaders} excShell={runningInExcShell}/>,
       document.getElementById('root')
     )
   })
@@ -72,8 +75,8 @@ function bootstrapInExcShell () {
   // set solution info, shortTitle is used when window is too small to display full title
   runtime.solution = {
     icon: 'AdobeExperienceCloud',
-    title: '373CoralCattle',
-    shortTitle: 'JGR'
+    title: 'Dep Dev Kit',
+    shortTitle: 'DEP'
   }
-  runtime.title = '373CoralCattle'
+  runtime.title = '27200-depdevkit'
 }
