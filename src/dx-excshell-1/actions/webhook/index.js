@@ -55,7 +55,7 @@ async function main (params) {
 
     if(typeof params.__ow_body == "string"){
       //logger.debug(`params.__ow_body is STRING and we are going to decode it`)
-      if(params.__ow_body.endsWith("=")){
+      if((!params.__ow_body.endsWith("}")) || (!params.__ow_body.endsWith("]"))){
         //logger.debug(`params.__ow_body DECODING`)
         let bodyBuffer = Buffer.from(params.__ow_body, 'base64')
         params.__ow_body = bodyBuffer.toString('utf8')
