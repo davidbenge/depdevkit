@@ -15,7 +15,7 @@ import Cookies from 'js-cookie';
 import actions from '../config';
 
 function LearnerSelect ({onSelectChange,...props}) {
-  const [selectedLearnerId, setLearnerId] = useState('learner1');
+  const [selectedLearnerId, setLearnerId] = useState();
 
   const getSelectedLearnerCookie = (value) => {
     return Cookies.get('selectedLearner');
