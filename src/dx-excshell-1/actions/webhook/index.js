@@ -6,6 +6,7 @@ const { Core } = require('@adobe/aio-sdk')
 const stateLib = require('@adobe/aio-lib-state')
 const { errorResponse, stringParameters, checkMissingRequestInputs } = require('../utils')
 const moment = require('moment')
+const unirest = require('unirest');
 let LEARNER_ID = "learnerX"
 
 // main function that will be executed by Adobe I/O Runtime
@@ -80,17 +81,18 @@ async function main (params) {
     }
 
     //store the request payload in the state
-    const state = await stateLib.init()
+    //const state = await stateLib.init()
 
     //get current learner if they exist 
     //logger.debug(`Learner id is ${LEARNER_ID}`)
-    const res = await state.get(LEARNER_ID) // res = { value, expiration }
-    let learnerValue = res ? res.value : new Array()
+    //const res = await state.get(LEARNER_ID) // res = { value, expiration }
+    //let learnerValue = res ? res.value : new Array()
 
     let payloadBody = JSON.parse(params.__ow_body)
     //logger.debug(`payloadBody checking size`)
     const payloadBodySize = Buffer.byteLength(JSON.stringify(payloadBody), 'utf8')
 
+    /*
     let storageContainer = {
       'call-time': moment().unix(),
       'call-size': payloadBodySize,
@@ -99,13 +101,44 @@ async function main (params) {
     learnerValue.push(storageContainer)
 
     await state.put(LEARNER_ID, learnerValue)
+    */
+   
+    //Init the Socket 
+    logger.info(`Sending to socket ${params.SOCKET_CLUSTER_ID} ${params.SOCKET_API_KEY} ${LEARNER_ID}`)
+    const PieSocket = require("piesocket-nodejs");
+    var piesocket = new PieSocket({
+      clusterId: params.SOCKET_CLUSTER_ID,
+      apiKey: params.SOCKET_API_KEY,
+      secret: params.SOCKET_API_SECRET
+    });
+    
+    piesocket.publish(LEARNER_ID, JSON.parse(params.__ow_body));
+    logger.info(`Done sending to socket`);
+
+    /*
+    const payload = {
+      "key": params.SOCKET_API_KEY,
+      "secret": params.SOCKET_API_SECRET,
+      "channelId": LEARNER_ID,
+      "message": params.__ow_body
+    }
+
+    var req = unirest('POST', `https://${params.SOCKET_CLUSTER_ID}.piesocket.com/api/publish`)
+    .headers({
+        'Content-Type': 'application/json'
+    })
+    .send(JSON.stringify(payload))
+    .end(function(res) {
+        if (res.error) throw new Error(res.error);
+        console.log(res.raw_body);
+    });
+    */
 
     const response = {
       statusCode: 200,
       body: {
         'message': `Successfully handled webhook for ${LEARNER_ID}`,
-        'payload-size-bytes': payloadBodySize,
-        'learner-test-count': learnerValue.length
+        'payload-size-bytes': payloadBodySize
       }
     }
 

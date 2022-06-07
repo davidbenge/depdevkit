@@ -35,6 +35,9 @@ export const PayloadList = ({ actionCallHeaders, props }) => {
   const [learnerId, setLearnerId] = useState();
   const history = useHistory();
   const [hasFocus, setFocus] = useState(true);
+  const apiKey = 'VCXCEuvhGcBDP7XhiJJUDvR1e1D3eiVjgZ9VRiaV';
+  let piesocket = undefined;
+  const cluster = "demo";
 
   const JsonConfig = {
     type: "front end",
@@ -60,21 +63,23 @@ export const PayloadList = ({ actionCallHeaders, props }) => {
       activeViewChanged(false);
     });
     
-    loadPayloads();
+    //loadPayloads();
 
-    const interval=setInterval(()=>{
-      loadPayloads();
-     },30000)
+    //const interval=setInterval(()=>{
+    //  loadPayloads();
+    // },30000)
        
-     return()=>clearInterval(interval);
+    //return()=>clearInterval(interval);
 
   }, []);
 
   const activeViewChanged = (newValue) => {
     //console.info("setting focus to",newValue);
     setFocus(newValue);
+    hasFocus=newValue;
   };
 
+  /*
   const loadPayloads = async () => {
     console.log(`in loadPayloads and has focus is ${hasFocus} and learner id is ${learnerId}`);
     if((!hasFocus) || (typeof learnerId === 'undefined')) {
@@ -111,6 +116,7 @@ export const PayloadList = ({ actionCallHeaders, props }) => {
 
     setIsLoading(false);
   };
+  */
 
   const checkForCookieSet = () => {
     let cookieSelectLearner = Cookies.get('selectedLearner');
@@ -125,7 +131,19 @@ export const PayloadList = ({ actionCallHeaders, props }) => {
     console.log(`in payload list handleLearnerInputChange ${plearnerId}`);
     if(typeof plearnerId !== 'undefined') {
       console.log(`in payload list setting learner id ${plearnerId}`);
-      learnerId = plearnerId;
+      //learnerId = plearnerId;
+      setLearnerId(plearnerId);
+      if(typeof piesocket !== 'undefined'){
+        piesocket.close();
+      }
+      piesocket = new WebSocket(`wss://${cluster}.piesocket.com/v3/${plearnerId}?api_key=${apiKey}&notify_self`);
+      console.log(`connected to websocket wss://${cluster}.piesocket.com/v3/${plearnerId}?api_key=${apiKey}&notify_self`);
+      piesocket.onmessage = function(message) {
+        alert(`Incoming message: ${message.data}`);
+      }
+      piesocket.onopen = () => {
+        console.log('piesocket connected')
+      }
     }else{
       console.error(`in handleLearnerInputChange and learner object is undefined`);
     }
@@ -139,91 +157,8 @@ export const PayloadList = ({ actionCallHeaders, props }) => {
         <Flex width="100%" alignItems="left">
         <LearnerSelect onSelectChange={handleLearnerInputChange} {...props}></LearnerSelect>
         </Flex>
-        <Flex width="100%" alignItems="center">
-          <ButtonGroup marginEnd="size-200">
-            <Button
-              variant="cta"
-              onPress={() => {
-                history.push('/create');
-              }}>
-              WHAT TO DO? NEXT ACTION FOR SELECTED. Eric?
-            </Button>
-            <Button
-              variant="primary"
-              isDisabled={selection.size === 0}
-              onPress={() => {
-                setDialogIsOpen(true);
-              }}>
-              Delete selection (TBD)
-            </Button>
-          </ButtonGroup>
-          {isDeleting && <ProgressCircle size="S" aria-label="Is deleting…" isIndeterminate />}
-        </Flex>
 
-        {isLoading ? (
-          <ProgressCircle size="L" aria-label="Loading…" isIndeterminate />
-        ) : (
-          <table className="spectrum-Table" style={{ width: '100%' }}>
-            <thead className="spectrum-Table-head">
-              <tr>
-                <th className="spectrum-Table-headCell">
-                  <Checkbox
-                    aria-label="Select All"
-                    onChange={(checked) => {
-                      selection.clear();
-                      if (checked) {
-                        selection.clear();
-                        payloads.forEach((payload) => selection.add(payloads.id));
-                      }
-                      setSelectedPayloads(new Set(selection));
-                    }}
-                  />
-                </th>
-                <th className="spectrum-Table-headCell">
-                  Rec Id
-                </th>
-                <th className="spectrum-Table-headCell">
-                  Webhook Payload
-                </th>
-              </tr>
-            </thead>
-            <tbody className="spectrum-Table-body" style={{ verticalAlign: 'middle' }}>
-            {payloads.map((pl,index) => (
-                <tr key={index} className="spectrum-Table-row">
-                  <td className="spectrum-Table-cell">
-                    <Checkbox
-                      aria-label="Select payload"
-                      isSelected={selectedPayloads.has(pl['call-time'])}
-                      onChange={() => {
-                        // Toggle payload selection
-                        if (selection.has(pl['call-time'])) {
-                          console.log("payload is already selected deleting");
-                          selection.delete(pl['call-time']);
-                        } else {
-                          console.log("payload is NOT already selected",pl['call-time']);
-                          selection.add(pl['call-time']);
-                        }
-
-                        setSelectedPayloads(new Set(selection));
-                      }}
-                    />
-                  </td>
-
-                  <td className="spectrum-Table-cell">
-                      <span>
-                        {pl['call-time']}
-                        <br />
-                      </span>
-                  </td>
-
-                  <td className="spectrum-Table-cell">
-                    <pre>{JSON.stringify(pl['payload'], null, 3)}</pre>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
+        <Flex width="100%" alignItems="left" id='messageContainer'></Flex>
       </Flex>
 
       <DialogContainer onDismiss={() => setDialogIsOpen(false)}>
