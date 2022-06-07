@@ -6,7 +6,6 @@ const { Core } = require('@adobe/aio-sdk')
 const stateLib = require('@adobe/aio-lib-state')
 const { errorResponse, stringParameters, checkMissingRequestInputs } = require('../utils')
 const moment = require('moment')
-const unirest = require('unirest');
 let LEARNER_ID = "learnerX"
 
 // main function that will be executed by Adobe I/O Runtime

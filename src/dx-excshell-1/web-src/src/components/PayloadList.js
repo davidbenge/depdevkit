@@ -137,12 +137,17 @@ export const PayloadList = ({ actionCallHeaders, props }) => {
         piesocket.close();
       }
       piesocket = new WebSocket(`wss://${cluster}.piesocket.com/v3/${plearnerId}?api_key=${apiKey}&notify_self`);
-      console.log(`connected to websocket wss://${cluster}.piesocket.com/v3/${plearnerId}?api_key=${apiKey}&notify_self`);
+
       piesocket.onmessage = function(message) {
-        alert(`Incoming message: ${message.data}`);
+        console.log(`Socket incoming message: ${message.data}`);
       }
+
+      piesocket.onclose = function(event) {
+        console.log(`closing socket: ${event}`);
+      }
+
       piesocket.onopen = () => {
-        console.log('piesocket connected')
+        console.log(`connected to websocket wss://${cluster}.piesocket.com/v3/${plearnerId}?api_key=${apiKey}&notify_self`);
       }
     }else{
       console.error(`in handleLearnerInputChange and learner object is undefined`);
