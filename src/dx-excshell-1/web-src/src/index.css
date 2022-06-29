@@ -8,42 +8,32 @@ body {
   margin: 0;
 }
 
-/** Custom Sidebar Styling **/
-.SideNav {
-  list-style-type: none;
-  margin: 0;
-  margin-bottom: 0px;
-  padding: 0;
-  outline: none;
-  height: 100%;
+.basic-url{
+  color: #333;
+  font-weight: bold;
 }
 
-.SideNav-item {
-  list-style-type: none;
-  margin: var(--spectrum-global-dimension-size-50) 0;
-}
-
-.SideNav-itemLink {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  justify-content: start;
+.webhook-url-wrapper{
+  border: 1px solid #333;
+  display: table;
   box-sizing: border-box;
-  width: 100%;
-  min-height: var(--spectrum-alias-single-line-height, var(--spectrum-global-dimension-size-400));
-  padding: var(--spectrum-global-dimension-size-65) var(--spectrum-global-dimension-size-150);
-  border-radius: var(--spectrum-alias-border-radius-regular, var(--spectrum-global-dimension-size-50));
-  font-size: var(--spectrum-alias-font-size-default, var(--spectrum-global-dimension-font-size-100));
-  font-weight: var(--spectrum-global-font-weight-regular, 400);
-  font-style: normal;
-  text-decoration: none;
-  word-break: break-word;
-  cursor: pointer;
-  background-color: var(--spectrum-alias-background-color-transparent,transparent);
-  color: var(--spectrum-alias-text-color,var(--spectrum-global-color-gray-800));
+  border-radius: 5px;
+  padding: 0px 5px 0px 5px;
 }
 
-.SideNav-itemLink.is-selected {
-  color: var(--spectrum-alias-text-color-hover,var(--spectrum-global-color-gray-900));
-  background-color: var(--spectrum-alias-highlight-hover);
+.webhook-url {
+  font-weight: 500;
+  margin-right: 10px;
+}
+
+.webhook-url-channel {
+  font-weight: normal;
+}
+
+.input-group-btn{
+  margin-left: 10px;
+}
+
+#logListElm > li{
+  list-style-type: none;
 }

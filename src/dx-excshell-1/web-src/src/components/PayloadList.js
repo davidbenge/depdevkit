@@ -2,7 +2,7 @@
  * <license header>
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import '@spectrum-css/typography';
 import '@spectrum-css/table';
 import {
@@ -23,21 +23,17 @@ import actionWebInvoke from '../utils';
 import actions from '../config';
 import LearnerSelect from './LearnerSelect';
 import Cookies from 'js-cookie';
-
-const selection = new Set();
+import { CallItem } from './CallItem';
 
 export const PayloadList = ({ actionCallHeaders, props }) => {
   const [isLoading, setIsLoading] = useState(false);
-  const [payloads, setPayloads] = useState([]);
-  const [selectedPayloads, setSelectedPayloads] = useState(selection);
-  const [isDialogOpen, setDialogIsOpen] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
+  const [loglist,setLoglist] = useState([]);
   const [learnerId, setLearnerId] = useState();
-  const history = useHistory();
   const [hasFocus, setFocus] = useState(true);
   const apiKey = 'VCXCEuvhGcBDP7XhiJJUDvR1e1D3eiVjgZ9VRiaV';
   let piesocket = undefined;
   const cluster = "demo";
+  const logListElement = useRef(null);
 
   const JsonConfig = {
     type: "front end",
@@ -62,14 +58,6 @@ export const PayloadList = ({ actionCallHeaders, props }) => {
       //console.warn("window is not active!" );
       activeViewChanged(false);
     });
-    
-    //loadPayloads();
-
-    //const interval=setInterval(()=>{
-    //  loadPayloads();
-    // },30000)
-       
-    //return()=>clearInterval(interval);
 
   }, []);
 
@@ -79,45 +67,6 @@ export const PayloadList = ({ actionCallHeaders, props }) => {
     hasFocus=newValue;
   };
 
-  /*
-  const loadPayloads = async () => {
-    console.log(`in loadPayloads and has focus is ${hasFocus} and learner id is ${learnerId}`);
-    if((!hasFocus) || (typeof learnerId === 'undefined')) {
-      if(typeof learnerId === 'undefined'){
-        //double check for page restarts
-        checkForCookieSet();
-      }
-      return;
-    }
-    console.log(`in loadPayloads and moving forward`);
-    setIsLoading(true);
-
-    let res;
-    try{
-      res = await actionWebInvoke(`${actions['payloads-list']}/${learnerId}`,actionCallHeaders);
-    }catch(e){
-      console.error(e);
-    } 
-    console.log(res);
-
-    if(res.status === 404){
-      alert(`No payloads found for this learner ${learnerId}`);
-      setPayloads([]);
-    }else if(res.error) {
-      alert(res.error.message);
-      setPayloads([]);
-    } else {
-      //if the payload has updated set the object
-      if(res.length !== payloads.length){
-        setPayloads(res.reverse());
-        console.log("loadPayloads after change load",payloads);
-      }
-    }
-
-    setIsLoading(false);
-  };
-  */
-
   const checkForCookieSet = () => {
     let cookieSelectLearner = Cookies.get('selectedLearner');
     console.log('cookie check');
@@ -126,6 +75,10 @@ export const PayloadList = ({ actionCallHeaders, props }) => {
       learnerId = cookieSelectLearner;
     }
   }
+
+  const addItemToLogList = (item) => {
+    setLoglist(loglist => [...loglist, item]);
+  };
 
   const handleLearnerInputChange = (plearnerId) => {
     console.log(`in payload list handleLearnerInputChange ${plearnerId}`);
@@ -139,14 +92,24 @@ export const PayloadList = ({ actionCallHeaders, props }) => {
       piesocket = new WebSocket(`wss://${cluster}.piesocket.com/v3/${plearnerId}?api_key=${apiKey}&notify_self`);
 
       piesocket.onmessage = function(message) {
+        const data = JSON.parse(message.data);
+        addItemToLogList(data);
         console.log(`Socket incoming message: ${message.data}`);
       }
 
       piesocket.onclose = function(event) {
+        const data = {
+          "connection-message":`Disconnected from websocket wss://${cluster}.piesocket.com/v3/${plearnerId}`
+        };
+        addItemToLogList(data);
         console.log(`closing socket: ${event}`);
       }
 
       piesocket.onopen = () => {
+        const data = {
+          "connection-message":`Connected to websocket wss://${cluster}.piesocket.com/v3/${plearnerId}`
+        };
+        addItemToLogList(data);
         console.log(`connected to websocket wss://${cluster}.piesocket.com/v3/${plearnerId}?api_key=${apiKey}&notify_self`);
       }
     }else{
@@ -157,52 +120,21 @@ export const PayloadList = ({ actionCallHeaders, props }) => {
   return (
     <View elementType="main" minHeight="100vh" marginX="size-400" onFocus={() => setFocus(true)} onBlur={() => setFocus(false)}>
       <Flex alignItems="center" justifyContent="center" direction="column" marginY="size-400" gap="size-400">
-        <h2 className="spectrum-Heading spectrum-Heading--sizeL spectrum-Heading--serif">Browse all webhook payloads</h2>
+        <h2 className="spectrum-Heading spectrum-Heading--sizeL spectrum-Heading--serif">Webhook Test Viewer</h2>
         
         <Flex width="100%" alignItems="left">
         <LearnerSelect onSelectChange={handleLearnerInputChange} {...props}></LearnerSelect>
         </Flex>
 
-        <Flex width="100%" alignItems="left" id='messageContainer'></Flex>
+        <Flex width="100%" alignItems="left" id='logs'>
+          <ul id='logListElm' ref={logListElement}>
+            {typeof(loglist) !== "undefined" ? (loglist.map((message,key) => (
+                <CallItem key={key} item={message}></CallItem>
+            ))
+            ):""}
+          </ul>
+        </Flex>
       </Flex>
-
-      <DialogContainer onDismiss={() => setDialogIsOpen(false)}>
-        {isDialogOpen && (
-          <AlertDialog
-            title="Are you sure ?"
-            variant="destructive"
-            primaryActionLabel="Confirm"
-            cancelLabel="Cancel"
-            onPrimaryAction={async () => {
-              setIsDeleting(true);
-              console.log("calling to delete payload ids ",JSON.stringify(Array.from(selection)));
-              const res = await actionWebInvoke(
-                actions['payloads-delete'],
-                actionCallHeaders,
-                {
-                  payloadIds: Array.from(selection)
-                }
-              );
-
-              if (res.error) {
-                alert(res.error.message);
-              } else {
-                setPayloads((payloads) => payloads.filter((payload) => !selection.has(payload.id)));
-                selection.clear();
-                setSelectedPayloads(new Set());
-              }
-
-              console.log(res);
-
-              setIsDeleting(false);
-            }}>
-            <strong>
-              {selection.size} payload{selection.size > 1 && 's'}
-            </strong>{' '}
-            will be deleted. Do you want to continue ?
-          </AlertDialog>
-        )}
-      </DialogContainer>
     </View>
   );
 };

@@ -91,16 +91,12 @@ async function main (params) {
     //logger.debug(`payloadBody checking size`)
     const payloadBodySize = Buffer.byteLength(JSON.stringify(payloadBody), 'utf8')
 
-    /*
-    let storageContainer = {
+    let callMessage = {
       'call-time': moment().unix(),
       'call-size': payloadBodySize,
-      'payload': payloadBody
+      'body': params.__ow_body,
+      'headers': params.__ow_headers
     }
-    learnerValue.push(storageContainer)
-
-    await state.put(LEARNER_ID, learnerValue)
-    */
    
     //Init the Socket 
     logger.info(`Sending to socket ${params.SOCKET_CLUSTER_ID} ${params.SOCKET_API_KEY} ${LEARNER_ID}`)
@@ -111,27 +107,8 @@ async function main (params) {
       secret: params.SOCKET_API_SECRET
     });
     
-    piesocket.publish(LEARNER_ID, JSON.parse(params.__ow_body));
+    piesocket.publish(LEARNER_ID, callMessage);
     logger.info(`Done sending to socket`);
-
-    /*
-    const payload = {
-      "key": params.SOCKET_API_KEY,
-      "secret": params.SOCKET_API_SECRET,
-      "channelId": LEARNER_ID,
-      "message": params.__ow_body
-    }
-
-    var req = unirest('POST', `https://${params.SOCKET_CLUSTER_ID}.piesocket.com/api/publish`)
-    .headers({
-        'Content-Type': 'application/json'
-    })
-    .send(JSON.stringify(payload))
-    .end(function(res) {
-        if (res.error) throw new Error(res.error);
-        console.log(res.raw_body);
-    });
-    */
 
     const response = {
       statusCode: 200,

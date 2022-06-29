@@ -9,7 +9,11 @@ import {
   Item, 
   Section,
   Flex,
-  TextField
+  View,
+  TextField,
+  Button,
+  Text,
+  Heading
 } from '@adobe/react-spectrum';
 import Cookies from 'js-cookie';
 import actions from '../config';
@@ -17,36 +21,33 @@ import actions from '../config';
 function LearnerSelect ({onSelectChange,...props}) {
   const [selectedLearnerId, setLearnerId] = useState();
 
-  const getSelectedLearnerCookie = (value) => {
-    return Cookies.get('selectedLearner');
-  }
-
   const handleInputChange = (sle) => {
     console.log("handleInputChange");
     console.log(sle);
 
     Cookies.set('selectedLearner', sle);
-    onSelectChange(sle);
     setLearnerId(sle);
   };
 
-  useEffect(() => {
-    let cookieSelectLearner = getSelectedLearnerCookie();
+  const sendLearnerChange = () => {
+    console.log("sendLearnerChange");
+    onSelectChange(selectedLearnerId);
+  }
 
-    console.log(`cookieSelectLearner: ${cookieSelectLearner}`);
-    if(typeof cookieSelectLearner !== 'undefined') {
-      onSelectChange(cookieSelectLearner);
-      setLearnerId(cookieSelectLearner);
-    }
-    console.log(`startUpLearner: ${cookieSelectLearner}`);
+  useEffect(() => {
   }, []);
 
   return (
-    <Flex direction="column">
-      <TextField label="Target Learner ID" onChange={handleInputChange} value={selectedLearnerId} />
-        Webhook endpoint:<br/>
-        <span>{actions['webhook']}/{selectedLearnerId}</span>
-    </Flex>
+    <div>
+        <div class="basic-url">Webhook URI</div>
+        <div class="webhook-url-wrapper">
+					<span class="webhook-url">/webhook/</span>
+					<TextField UNSAFE_className="webhook-url-channel" onChange={handleInputChange} value={selectedLearnerId} />
+					<span class="input-group-btn">
+            <Button variant="primary" onPress={sendLearnerChange} >Connect</Button>
+					</span>
+				</div>
+    </div>
   )
 }
 

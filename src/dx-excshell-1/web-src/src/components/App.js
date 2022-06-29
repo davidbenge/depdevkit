@@ -5,13 +5,6 @@
 import React from 'react'
 import { Provider, defaultTheme, Grid, View } from '@adobe/react-spectrum'
 import ErrorBoundary from 'react-error-boundary'
-import { HashRouter as Router, Switch, Route } from 'react-router-dom'
-import SideBar from './SideBar'
-import ActionsForm from './ActionsForm'
-import { Home } from './Home'
-import { Auth } from './Auth'
-import { About } from './About'
-import PayloadTestForm from './PayloadTestForm'
 import { PayloadList } from './PayloadList'
 
 function App (props) {
@@ -31,60 +24,11 @@ function App (props) {
 
   return (
     <ErrorBoundary onError={onError} FallbackComponent={fallbackComponent}>
-      <Router>
-        <Provider theme={defaultTheme} colorScheme={`light`}>
-          {props.excShell? (
-            <Grid
-            areas={['sidebar content']}
-            columns={['256px', '3fr']}
-            rows={['auto']}
-            height='100vh'
-            gap='size-100'
-          >
-            <View
-              gridArea='sidebar'
-              backgroundColor='gray-200'
-              padding='size-200'
-            >
-              <SideBar></SideBar>
-            </View>
-            <View gridArea='content' padding='size-200'>
-              <Switch>
-                <Route exact path='/'>
-                  <Home></Home>
-                </Route>
-                <Route path='/auth'>
-                  <Auth runtime={props.runtime} ims={props.ims} actionCallHeaders={props.actionCallHeaders}/>
-                </Route>
-                <Route path='/payload-test'>
-                  <PayloadTestForm runtime={props.runtime} ims={props.ims} actionCallHeaders={props.actionCallHeaders}/>
-                </Route>
-                <Route path='/payload-list'>
-                  <PayloadList runtime={props.runtime} ims={props.ims} actionCallHeaders={props.actionCallHeaders}/>
-                </Route>
-              </Switch>
-            </View>
-          </Grid>
-          ) : (
-            <View padding='size-200'>
-              <Switch>
-                <Route exact path='/'>
-                  <Home></Home>
-                </Route>
-                <Route path='/auth'>
-                  <Auth runtime={props.runtime} ims={props.ims} actionCallHeaders={props.actionCallHeaders}/>
-                </Route>
-                <Route path='/payload-test'>
-                  <PayloadTestForm runtime={props.runtime} ims={props.ims} actionCallHeaders={props.actionCallHeaders}/>
-                </Route>
-                <Route path='/payload-list'>
-                  <PayloadList runtime={props.runtime} ims={props.ims} actionCallHeaders={props.actionCallHeaders}/>
-                </Route>
-              </Switch>
-            </View>
-          )}
-        </Provider>
-      </Router>
+      <Provider theme={defaultTheme} colorScheme={`light`}>
+        <View padding='size-200'>
+          <PayloadList runtime={props.runtime} ims={props.ims} actionCallHeaders={props.actionCallHeaders}/>
+        </View>
+      </Provider>
     </ErrorBoundary>
   )
 
