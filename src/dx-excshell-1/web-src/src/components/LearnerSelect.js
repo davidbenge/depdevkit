@@ -39,14 +39,13 @@ function LearnerSelect ({onSelectChange,...props}) {
 
   return (
     <div>
-        <div class="basic-url">Webhook URI</div>
-        <div class="webhook-url-wrapper">
-					<span class="webhook-url">/webhook/</span>
-					<TextField UNSAFE_className="webhook-url-channel" onChange={handleInputChange} value={selectedLearnerId} />
-					<span class="input-group-btn">
-            <Button variant="primary" onPress={sendLearnerChange} >Connect</Button>
-					</span>
-				</div>
+      <div class="webhook-url-wrapper">
+        <span class="webhook-url">{actions['webhook']}</span>
+        <TextField UNSAFE_className="webhook-url-channel" onChange={handleInputChange} value={selectedLearnerId} />
+        <span class="input-group-btn">
+          <Button variant="primary" onPress={sendLearnerChange} >Connect</Button>
+        </span>
+      </div>
     </div>
   )
 }

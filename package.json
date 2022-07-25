@@ -7,6 +7,7 @@
     "@adobe/aio-sdk": "^3.0.0",
     "@adobe/exc-app": "^0.2.21",
     "@adobe/react-spectrum": "^3.16.5",
+    "@react-spectrum/list": "^3.0.0-beta.0",
     "@spectrum-css/table": "^4.0.15",
     "@spectrum-css/typography": "^4.0.16",
     "@spectrum-icons/workflow": "^3.2.0",
