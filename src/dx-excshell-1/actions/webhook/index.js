@@ -165,6 +165,7 @@ async function main (params) {
       const payloadBodySize = Buffer.byteLength(JSON.stringify(params.body), 'utf8')
   
       let callMessage = {
+        'id': moment().unix(),
         'call-time': moment().unix(),
         'call-body-size': payloadBodySize,
         'body': params.body,

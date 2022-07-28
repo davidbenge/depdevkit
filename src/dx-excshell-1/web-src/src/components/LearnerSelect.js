@@ -18,19 +18,15 @@ import {
 import Cookies from 'js-cookie';
 import actions from '../config';
 
-function LearnerSelect ({onSelectChange,...props}) {
+function LearnerSelect ({onSelectChange,connectionStatusText="Connect",...props}) {
   const [selectedLearnerId, setLearnerId] = useState();
 
   const handleInputChange = (sle) => {
-    console.log("handleInputChange");
-    console.log(sle);
-
     Cookies.set('selectedLearner', sle);
     setLearnerId(sle);
   };
 
   const sendLearnerChange = () => {
-    console.log("sendLearnerChange");
     onSelectChange(selectedLearnerId);
   }
 
@@ -38,16 +34,17 @@ function LearnerSelect ({onSelectChange,...props}) {
   }, []);
 
   return (
-    <div>
-      <div class="webhook-url-wrapper">
-        <span class="webhook-url">{actions['webhook']}</span>
-        <TextField UNSAFE_className="webhook-url-channel" onChange={handleInputChange} value={selectedLearnerId} />
-        <span class="input-group-btn">
-          <Button variant="primary" onPress={sendLearnerChange} >Connect</Button>
-        </span>
-      </div>
-    </div>
+    <Flex direction="row" height="size-800" gap="size-100" justifyContent="center" alignContent="center">
+      <View width="size-8000" >{actions['webhook']}</View>
+      <View width="size-2500">
+        <TextField UNSAFE_className="webhook-url-channel" onChange={handleInputChange} value={selectedLearnerId} aria-label="webhook channel url" />
+      </View>
+      <View width="size-1200">
+        <Button variant="primary" onPress={sendLearnerChange} >{connectionStatusText ? connectionStatusText: 'Connect'}</Button>
+      </View>
+    </Flex>
   )
 }
+
 
 export default LearnerSelect
