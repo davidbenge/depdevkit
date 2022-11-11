@@ -160,6 +160,9 @@ async function main (params) {
       try { delete cleanHeaders["x-forwarded-port"] } catch (error) {}
       try { delete cleanHeaders["x-forwarded-proto"] } catch (error) {}
       try { delete cleanHeaders["x-real-ip"] } catch (error) {}
+      if(cleanHeaders["authorization"]){
+        cleanHeaders["authorization"] = "******* hiden to avoid security issues *******"
+      }
   
       // getting payload body size
       const payloadBodySize = Buffer.byteLength(JSON.stringify(params.body), 'utf8')

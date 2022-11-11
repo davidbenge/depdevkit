@@ -12,12 +12,22 @@ runtimeManifest:
         webhook:
           function: actions/webhook/index.js
           web: raw
-          runtime: 'nodejs:14'
+          runtime: 'nodejs:16'
           inputs:
             LOG_LEVEL: debug
             SOCKET_CLUSTER_ID: demo
             SOCKET_API_KEY: VCXCEuvhGcBDP7XhiJJUDvR1e1D3eiVjgZ9VRiaV
             SOCKET_API_SECRET: Fvev5c0k59VZ1jRLWuj5URyF5idSdHWm
+          annotations:
+            require-adobe-auth: false
+            final: true
+        get-auth:
+          function: actions/get-auth/index.js
+          web: 'yes'
+          runtime: 'nodejs:16'
+          inputs:
+            LOG_LEVEL: debug
+            IMS: $IMS
           annotations:
             require-adobe-auth: false
             final: true
