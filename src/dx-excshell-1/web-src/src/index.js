@@ -17,10 +17,12 @@ try {
   /* **here you can mock the exc runtime and ims objects** */
   const mockRuntime = { on: () => {} }
   const mockIms = {}
-
+  const webSocketApiKey = `${process.env.SOCKET_API_KEY}`
+  const webSocketApiClusterId = `${process.env.SOCKET_CLUSTER_ID}`
+  
   // render the actual react application and pass along the runtime object to make it available to the App
   ReactDOM.render(
-    <App runtime={mockRuntime} ims={mockIms} excShell={runningInExcShell}/>,
+    <App runtime={mockRuntime} ims={mockIms} excShell={runningInExcShell} webSocketApiKey={webSocketApiKey} webSocketApiClusterId={webSocketApiClusterId}/>,
     document.getElementById('root')
   )
 } catch (e) {

@@ -15,9 +15,9 @@ runtimeManifest:
           runtime: 'nodejs:16'
           inputs:
             LOG_LEVEL: debug
-            SOCKET_CLUSTER_ID: s8983.nyc1
-            SOCKET_API_KEY: GyeZdkQKCwpthQoV9rOryCHhLJWiOPxLQ9o7seUI
-            SOCKET_API_SECRET: pWmFZiz0apCNIX8wWDHN36SudvBsNp5O
+            SOCKET_CLUSTER_ID: $SOCKET_CLUSTER_ID
+            SOCKET_API_KEY: $SOCKET_API_KEY
+            SOCKET_API_SECRET: $SOCKET_API_SECRET
           annotations:
             require-adobe-auth: false
             final: true

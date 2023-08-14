@@ -54,6 +54,9 @@ jobs:
           AIO_PROJECT_WORKSPACE_ID: ${{ secrets.AIO_PROJECT_WORKSPACE_ID_PROD }}
           AIO_PROJECT_WORKSPACE_NAME: ${{ secrets.AIO_PROJECT_WORKSPACE_NAME_PROD }}
           AIO_PROJECT_WORKSPACE_DETAILS_SERVICES: ${{ secrets.AIO_PROJECT_WORKSPACE_DETAILS_SERVICES_PROD }}
+          SOCKET_CLUSTER_ID: ${{secrets.SOCKET_CLUSTER_ID_PROD}}
+          SOCKET_API_KEY: ${{secrets.SOCKET_API_KEY_PROD}}
+          SOCKET_API_SECRET: ${{secrets.SOCKET_API_SECRET_PROD}}
         uses: adobe/aio-apps-action@2.0.1
         with:
           os: ${{ matrix.os }}

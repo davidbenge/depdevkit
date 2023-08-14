@@ -30,7 +30,8 @@ export const PayloadList = ({ actionCallHeaders, props }) => {
   const [loglist,setLoglist] = useState([]);
   const [learnerId, setLearnerId] = useState();
   const [hasFocus, setFocus] = useState(true);
-  const apiKey = 'VCXCEuvhGcBDP7XhiJJUDvR1e1D3eiVjgZ9VRiaV';
+  const apiKey = `${process.env.SOCKET_API_KEY}`
+  const webSocketApiClusterId = `${process.env.SOCKET_CLUSTER_ID}`
   let piesocket = undefined;
   const cluster = "demo";
   const logListElement = useRef(null);
@@ -89,7 +90,7 @@ export const PayloadList = ({ actionCallHeaders, props }) => {
       if(typeof piesocket !== 'undefined'){
         piesocket.close();
       }
-      piesocket = new WebSocket(`wss://${cluster}.piesocket.com/v3/${plearnerId}?api_key=${apiKey}&notify_self`);
+      piesocket = new WebSocket(`wss://${webSocketApiClusterId}.piesocket.com/v3/${plearnerId}?api_key=${apiKey}&notify_self`);
 
       piesocket.onmessage = function(message) {
         const data = JSON.parse(message.data);
@@ -99,7 +100,7 @@ export const PayloadList = ({ actionCallHeaders, props }) => {
 
       piesocket.onclose = function(event) {
         const data = {
-          "connection-message":`Disconnected from websocket wss://${cluster}.piesocket.com/v3/${plearnerId}`
+          "connection-message":`Disconnected from websocket wss://${webSocketApiClusterId}.piesocket.com/v3/${plearnerId}`
         };
         addItemToLogList(data);
         console.log(`closing socket: ${event}`);
@@ -107,10 +108,10 @@ export const PayloadList = ({ actionCallHeaders, props }) => {
 
       piesocket.onopen = () => {
         const data = {
-          "connection-message":`Connected to websocket wss://${cluster}.piesocket.com/v3/${plearnerId}`
+          "connection-message":`Connected to websocket wss://${webSocketApiClusterId}.piesocket.com/v3/${plearnerId}`
         };
         addItemToLogList(data);
-        console.log(`connected to websocket wss://${cluster}.piesocket.com/v3/${plearnerId}?api_key=${apiKey}&notify_self`);
+        console.log(`connected to websocket wss://${webSocketApiClusterId}.piesocket.com/v3/${plearnerId}?api_key=${apiKey}&notify_self`);
       }
     }else{
       console.error(`in handleLearnerInputChange and learner object is undefined`);

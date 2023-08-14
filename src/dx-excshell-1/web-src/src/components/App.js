@@ -70,7 +70,8 @@ function App (props) {
   let learnerId = undefined
   let socketConnectionStatus = false
   let selectedWebhookCall = null
-  const apiKey = 'VCXCEuvhGcBDP7XhiJJUDvR1e1D3eiVjgZ9VRiaV'
+  const apiKey = `${process.env.SOCKET_API_KEY}`
+  const webSocketApiClusterId = `${process.env.SOCKET_CLUSTER_ID}`
   let piesocket = undefined
   const cluster = "demo"
   console.log('runtime object:', props.runtime)
@@ -160,7 +161,7 @@ function App (props) {
       }
 
       piesocket.onopen = () => {
-        console.log(`connected to websocket wss://${cluster}.piesocket.com/v3/${plearnerId}?api_key=${apiKey}&notify_self`);
+        console.log(`connected to websocket wss://${webSocketApiClusterId}.piesocket.com/v3/${plearnerId}?api_key=${apiKey}&notify_self`);
       }
     }else{
       try{
