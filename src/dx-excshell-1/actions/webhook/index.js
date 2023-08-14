@@ -7,21 +7,26 @@ const stateLib = require('@adobe/aio-lib-state')
 const { errorResponse, stringParameters, checkMissingRequestInputs } = require('../utils')
 const moment = require('moment')
 let LEARNER_ID = "learnerX"
+const base64regex = /^([0-9a-zA-Z+/]{4})*(([0-9a-zA-Z+/]{2}==)|([0-9a-zA-Z+/]{3}=))?$/
+
 
 // main function that will be executed by Adobe I/O Runtime
 async function main (params) {
   // create a Logger
-  const logger = Core.Logger('main', { level: params.LOG_LEVEL || 'info' })
+  const logger = Core.Logger('main', { level: params.LOG_LEVEL || 'debug' })
   // 'info' is the default level if not set
   logger.info('Calling the webhookin action')
 
   // Since we are RAW we need to parse the body
-  try {
-    let cleanBodyBuffer = Buffer.from(params.__ow_body, 'base64')
-    cleanBody = cleanBodyBuffer.toString('utf8')
-    params.body = cleanBody
-  } catch (error) {
-    logger.warn(`problem converting body from base64 ${error.message}`)
+  if(base64regex.test(params.__ow_body)){
+    try {
+      let cleanBodyBuffer = Buffer.from(params.__ow_body, 'base64')
+      cleanBody = cleanBodyBuffer.toString('utf8')
+      params.body = cleanBody
+    } catch (error) {
+      logger.warn(`problem converting body from base64 ${error.message}`)
+      return errorResponse(500, 'error converting body from base64', logger)
+    }
   }
 
   //Since we are RAW we need to parse Query params
@@ -72,7 +77,7 @@ async function main (params) {
   }
 
   // Handle challenge request
-  if (params.body.challenge) {
+  if (params.body && params.body.challenge) {
     let response = {
       statusCode: 200,
       headers: {
