@@ -62,4 +62,4 @@ jobs:
         uses: adobe/aio-apps-action@2.0.1
         with:
           os: ${{ matrix.os }}
-          command: DEBUG=* aio app deploy
+          command: deploy
