@@ -6,7 +6,6 @@ Welcome to Developer Enablement Program helper
 
 - Populate the `.env` file in the project root and fill it as shown by the example values needed found in _dot.env
   
-    
 
 ## Local Dev
 
